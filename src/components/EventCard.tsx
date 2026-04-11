@@ -11,12 +11,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, MapPin, Users, Tag } from 'lucide-react';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import type { Event } from '@/types/event';
-import { CATEGORY_LABELS, STATUS_LABELS } from '@/types/event';
-import { formatShortDate, formatPrice, getAvailableSpots } from '@/lib/utils';
+import { Card, CardContent, CardFooter, CardHeader } from './ui/card';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
+import type { Event } from '../types/event';
+import { CATEGORY_LABELS, STATUS_LABELS } from '../types/event';
+import { formatShortDate, formatPrice, getAvailableSpots } from '../lib/utils';
+import { DeleteEventButton } from './DeleteEventButton';
 
 interface EventCardProps {
   event: Event;
@@ -114,9 +115,14 @@ export function EventCard({ event, currentUserId }: EventCardProps): React.React
         <p className="text-lg font-bold text-primary">{formatPrice(event.price)}</p>
         <div className="flex gap-2">
           {currentUserId && currentUserId === event.organizerId && (
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/events/${event.id}/edit`}>Editar</Link>
-            </Button>
+            <> {/* <-- Agregamos fragmento vacío para envolver ambos botones */}
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/events/${event.id}/edit`}>Editar</Link>
+              </Button>
+              
+              {/* DeleteEventButton*/}
+              <DeleteEventButton eventId={event.id} eventTitle={event.title} />
+            </>
           )}
           <Button asChild variant={isAvailable ? 'default' : 'secondary'} size="sm">
             <Link href={`/events/${event.id}`}>{isAvailable ? 'Ver detalles' : 'Ver evento'}</Link>
