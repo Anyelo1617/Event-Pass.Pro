@@ -3,14 +3,16 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { createEventSchema, type FormState, type CreateEventInput } from '@/types/event';
+
+import { createEventSchema, type FormState, type CreateEventInput } from '../types/event';
 import {
   createEvent as createEventInDb,
   updateEvent as updateEventInDb,
   deleteEvent as deleteEventInDb,
   registerForEvent as registerInDb,
-} from '@/data/events';
-import { adminAuth } from '@/lib/firebase/admin';
+} from '../data/events';
+
+import { adminAuth } from '../lib/firebase/admin';
 
 // =============================================================================
 // AUTENTICACIÓN EN SERVER ACTIONS
