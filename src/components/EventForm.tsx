@@ -35,7 +35,7 @@ const initialState: FormState = {
   message: '',
 };
 
-function MagicGenerateButton({ onGenerate, onStart, onEnd }: { onGenerate: (data: any) => void, onStart: () => void, onEnd: () => void }) {
+function MagicGenerateButton({ tone, onGenerate, onStart, onEnd }: { tone: string, onGenerate: (data: any) => void, onStart: () => void, onEnd: () => void }) {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerate = async () => {
@@ -54,7 +54,7 @@ function MagicGenerateButton({ onGenerate, onStart, onEnd }: { onGenerate: (data
     setIsGenerating(true);
     onStart();
     try {
-      const result = await generateEventDetailsAction(title);
+      const result = await generateEventDetailsAction(title, tone);
 
       if (result.success && result.data) {
         onGenerate(result.data);
@@ -201,6 +201,10 @@ export function EventForm({ event, mode = 'create' }: EventFormProps) {
   const isEditing = mode === 'edit' && !!event;
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [isPosterGenerating, setIsPosterGenerating] = useState(false);
+
+  const [descriptionVariants, setDescriptionVariants] = useState<string[]>([]);
+  const [tone, setTone] = useState<string>('emocionante');
+
   const { user } = useAuth(); // Import useAuth from context
   const router = useRouter();
 
@@ -269,11 +273,20 @@ export function EventForm({ event, mode = 'create' }: EventFormProps) {
                 />
                 {!isEditing && (
                   <MagicGenerateButton
+
+                    tone={tone} //Pasamos el tono
+
                     onStart={() => setIsAiGenerating(true)}
                     onEnd={() => setIsAiGenerating(false)}
                     onGenerate={(data) => {
+
+                      // Guardamos el Array de variants
+                      setDescriptionVariants(data.descriptions);
+
                       const descInput = document.getElementById('description') as HTMLTextAreaElement;
-                      if (descInput) descInput.value = data.description;
+                  
+                      //cambio ya q ahora es array
+                      if (descInput) descInput.value = data.descriptions[0];
 
                       const tagsInput = document.getElementById('tags') as HTMLInputElement;
                       if (tagsInput) tagsInput.value = data.tags.join(', ');
@@ -282,6 +295,19 @@ export function EventForm({ event, mode = 'create' }: EventFormProps) {
                 )}
               </div>
               <FieldError errors={state.errors?.title} />
+            </div>
+
+            {/*Selector de tono IA */}
+            <div className="space-y-2">
+              <Label>Tono de la IA</Label>
+              <Select value={tone} onValueChange={setTone}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="formal">Formal</SelectItem>
+                  <SelectItem value="casual">Casual</SelectItem>
+                  <SelectItem value="exciting">Exciting</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -296,6 +322,26 @@ export function EventForm({ event, mode = 'create' }: EventFormProps) {
                 disabled={isAiGenerating}
                 className={isAiGenerating ? 'opacity-50 cursor-not-allowed bg-muted' : ''}
               />
+              {/*Mostramos las opciones, if existen */}
+              {descriptionVariants.length > 0 && (
+                <div className="mt-2 space-y-2">
+                  <Label className="text-primary text-sm">Elige una variante:</Label>
+                  {descriptionVariants.map((v, i) => (
+                    <div 
+                    key={i} 
+                    onClick={() => { 
+                      const descInput = document.getElementById('description') as HTMLTextAreaElement;
+                      if (descInput) descInput.value = v; 
+                    }} 
+                    className="p-3 text-sm border-2 border-muted rounded-lg cursor-pointer transition-all hover:border-primary/50 hover:bg-primary/5 shadow-sm"
+                  >
+                    <p className="line-clamp-3 italic text-muted-foreground">"{v}"</p>
+                    <span className="text-[10px] font-bold text-primary uppercase mt-2 block">Seleccionar esta versión</span>
+                  </div>
+                  ))}
+                </div>
+              )}
+
               <FieldError errors={state.errors?.description} />
             </div>
 
