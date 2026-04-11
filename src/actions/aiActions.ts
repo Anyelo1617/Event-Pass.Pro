@@ -61,12 +61,12 @@ import { EVENT_CATEGORIES } from '@/types/event';
 // =============================================================================
 
 export interface GeneratedEventDetails {
-    description: string;
+    descriptions: string[]; // Cambiamos description string a descriptions array
     category: string;
     tags: string[];
 }
 
-export async function generateEventDetailsAction(title: string): Promise<{ success: boolean; data?: GeneratedEventDetails; error?: string }> {
+export async function generateEventDetailsAction(title: string, tone: string = 'emocionante'): Promise<{ success: boolean; data?: GeneratedEventDetails; error?: string }> {
     try {
         if (!process.env.GEMINI_API_KEY) {
             throw new Error('GEMINI_API_KEY is not configured');
@@ -79,19 +79,19 @@ export async function generateEventDetailsAction(title: string): Promise<{ succe
         const client = getGeminiClient();
 
         const prompt = `
-      You are an expert event planner. Based on the event title "${title}", please generate:
-      1. A compelling and engaging description (2-3 paragraphs, MUST be under 1000 characters).
-      2. The most suitable category from this list: ${EVENT_CATEGORIES.join(', ')}.
-      3. A list of 5 relevant tags (lowercase, concise).
+        You are an expert event planner. Based on the event title "${title}" and a "${tone}" tone, please generate:
+        1. 3 different compelling and engaging description variants (2-3 paragraphs each, MUST be under 1000 characters).
+        2. The most suitable category from this list: ${EVENT_CATEGORIES.join(', ')}.
+        3. A list of 5 relevant tags (lowercase, concise).
 
-      Return the response in strictly valid JSON format with this structure:
-      {
-        "description": "string",
-        "category": "string",
-        "tags": ["tag1", "tag2"]
-      }
-      Do not include any markdown formatting or explanations, just the JSON string.
-    `;
+        Return the response in strictly valid JSON format with this structure:
+        {
+            "descriptions": ["string", "string", "string"],
+            "category": "string",
+            "tags": ["tag1", "tag2"]
+        }
+        Do not include any markdown formatting or explanations, just the JSON string.
+        `;
 
         // The new SDK syntax might differ, but assuming standardized usage:
         // client.models.generateContent({ model: 'model-name', contents: ... })
