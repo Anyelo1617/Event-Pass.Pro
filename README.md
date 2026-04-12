@@ -162,3 +162,4 @@ El generador de descripciones necesitaba mayor control, estructura y personaliza
 
 ---
 Link al video explicativo: 
+https://youtu.be/qmYJ0fXkw14
